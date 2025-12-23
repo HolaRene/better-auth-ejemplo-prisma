@@ -8,17 +8,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { UserAvatar } from "@/components/user-avatar";
+import { Usuario } from "@/lib/auth";
+import { obtenerSesionServer } from "@/lib/obtener-sesion";
+
 import { format } from "date-fns";
 import { CalendarDaysIcon, MailIcon, ShieldIcon, UserIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { unauthorized } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
+  title: "Tablero principal",
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   // TODO: Check for authentication
+  const sesion = await obtenerSesionServer();
+  const usuario = sesion?.user;
+
+  if (!usuario) unauthorized();
+
+
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-12">
@@ -31,21 +41,19 @@ export default function DashboardPage() {
         </div>
         {/* TODO: Use actual user data */}
         <EmailVerificationAlert />
-        <ProfileInformation />
+        <ProfileInformation user={usuario} />
       </div>
     </main>
   );
 }
 
-function ProfileInformation() {
+interface ProfileInformationProps {
+  user: Usuario;
+}
+
+function ProfileInformation({ user }: ProfileInformationProps) {
   // TODO: Render real user info
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    image: undefined,
-    role: "admin",
-    createdAt: new Date(),
-  };
+
 
   return (
     <Card>

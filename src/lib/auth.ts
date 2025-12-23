@@ -32,4 +32,58 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    /**
+     * Configuración del modelo de usuario en Better Auth.
+     *
+     * - `additionalFields`: añade campos personalizados al modelo `User` que
+     *   deben existir también en Prisma (ver `prisma/schema.prisma`).
+     * - `role`: campo de tipo cadena para control de roles/RBAC.
+     *   - `type`: indica el tipo de dato manejado por Better Auth (p.ej. 'string').
+     *   - `input: false`: evita que el campo se pueda establecer desde los flujos
+     *     de entrada del usuario (registro/inicio de sesión). Debe gestionarse
+     *     desde lógica del servidor o administración.
+     *
+     * Notas sobre `type`:
+     * - Determina validación/serialización en Better Auth.
+     * - Debe ser coherente con el tipo declarado en Prisma.
+     * - Tipos habituales: 'string', 'number', 'boolean', 'date'.
+     */
+    user: {
+        additionalFields: {
+            role: {
+                type: 'string',
+                input: false,
+            },
+        },
+    },
 })
+
+/**
+ * Tipo utilitario para la sesión actual.
+ *
+ * Derivado de `auth.$Infer.Session`, representa la forma tipada de la sesión
+ * devuelta por Better Auth en servidor o cliente.
+ *
+ * Uso:
+ * ```ts
+ * const sesion: Sesion | null = await auth.session.get()
+ * if (sesion) {
+ *   // sesion.user contiene datos del usuario autenticado
+ * }
+ * ```
+ */
+export type Sesion = typeof auth.$Infer.Session
+
+/**
+ * Tipo utilitario para el usuario autenticado dentro de la sesión.
+ *
+ * Derivado de `auth.$Infer.Session.user`. Incluye los campos estándar de Better Auth
+ * y cualquier `additionalField` definido (p.ej., `role`).
+ *
+ * Uso:
+ * ```ts
+ * const sesion = await auth.session.get()
+ * const usuario: Usuario | undefined = sesion?.user
+ * ```
+ */
+export type Usuario = typeof auth.$Infer.Session.user

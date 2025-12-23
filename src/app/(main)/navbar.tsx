@@ -1,11 +1,20 @@
 import codingInFlowLogo from "@/assets/coding_in_flow_logo.jpg";
 import { ModeToggle } from "@/components/mode-toggle";
 import { UserDropdown } from "@/components/user-dropdown";
+import { obtenerSesionServer } from "@/lib/obtener-sesion";
 import Image from "next/image";
 import Link from "next/link";
 
-export function Navbar() {
+export async function Navbar() {
   // TODO: Display logged-in user
+  const sesion = await obtenerSesionServer();
+  const usuario = sesion?.user;
+
+  // TODO: Handle unauthenticated state
+  if (!usuario) {
+    return null;
+  }
+
 
   return (
     <header className="bg-background border-b">
