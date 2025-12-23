@@ -13,6 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export function UserDropdown() {
   // TODO: Render real user info
@@ -72,6 +74,14 @@ function SignOutItem() {
 
   async function handleSignOut() {
     // TODO: Handle sign out
+    const { error } = await authClient.signOut();
+
+    if (error) {
+      toast.error(error.message || "Ocurrió un error al cerrar sesión");
+    } else {
+      toast.success("Sesión cerrada exitosamente");
+      router.push("/sign-in");
+    }
   }
 
   return (

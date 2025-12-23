@@ -19,25 +19,27 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { passwordSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const signUpSchema = z
   .object({
-    name: z.string().min(1, { message: "Name is required" }),
-    email: z.email({ message: "Please enter a valid email" }),
+    name: z.string().min(1, { message: "El nombre es obligatorio" }),
+    email: z.email({ message: "Por favor ingresa un correo válido" }),
     password: passwordSchema,
     passwordConfirmation: z
       .string()
-      .min(1, { message: "Please confirm password" }),
+      .min(1, { message: "Por favor confirma la contraseña" }),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
-    message: "Passwords do not match",
+    message: "La contraseña y la confirmación no coinciden",
     path: ["passwordConfirmation"],
   });
 
@@ -59,17 +61,33 @@ export function SignUpForm() {
   });
 
   async function onSubmit({ email, password, name }: SignUpValues) {
-    // TODO: Handle sign up
+    // Limpia errores previos para mostrar solo el resultado del envío actual.
+    setError(null);
+    // Intenta registrar al usuario por email y define la página post-verificación.
+    const { error } = await authClient.signUp.email({
+      email,
+      password,
+      name,
+      callbackURL: "/email-verified",
+    })
+
+    if (error) {
+      setError(error.message || "Ocurrió un error inesperado");
+    } else {
+      toast.success("Cuenta creada exitosamente");
+      router.push("/dashboard");
+    }
   }
+
 
   const loading = form.formState.isSubmitting;
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-lg md:text-xl">Sign Up</CardTitle>
+        <CardTitle className="text-lg md:text-xl">Registrarse</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Enter your information to create an account
+          Ingresa tu información para crear una cuenta
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -112,11 +130,11 @@ export function SignUpForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Contraseña</FormLabel>
                   <FormControl>
                     <PasswordInput
                       autoComplete="new-password"
-                      placeholder="Password"
+                      placeholder="Contraseña"
                       {...field}
                     />
                   </FormControl>
@@ -130,11 +148,11 @@ export function SignUpForm() {
               name="passwordConfirmation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel>Confirmar contraseña</FormLabel>
                   <FormControl>
                     <PasswordInput
                       autoComplete="new-password"
-                      placeholder="Confirm password"
+                      placeholder="Confirmar contraseña"
                       {...field}
                     />
                   </FormControl>
@@ -150,7 +168,7 @@ export function SignUpForm() {
             )}
 
             <LoadingButton type="submit" className="w-full" loading={loading}>
-              Create an account
+              Crear una cuenta
             </LoadingButton>
           </form>
         </Form>
@@ -158,9 +176,9 @@ export function SignUpForm() {
       <CardFooter>
         <div className="flex w-full justify-center border-t pt-4">
           <p className="text-muted-foreground text-center text-xs">
-            Already have an account?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link href="/sign-in" className="underline">
-              Sign in
+              Iniciar sesión
             </Link>
           </p>
         </div>

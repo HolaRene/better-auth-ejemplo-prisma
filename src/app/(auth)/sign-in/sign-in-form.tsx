@@ -23,11 +23,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const signInSchema = z.object({
@@ -55,7 +57,20 @@ export function SignInForm() {
   });
 
   async function onSubmit({ email, password, rememberMe }: SignInValues) {
-    // TODO: Handle sign in
+    // TODO: Manejo de envuoío de formulario
+    setError(null);
+    setLoading(true);
+    const { error } = await authClient.signIn.email(
+      { email, password, rememberMe })
+
+    setLoading(false);
+    if (error) {
+      setError(error.message || "Ha ocurrido un error inesperado");
+    } else {
+      toast.success("Inicio de sesión exitoso");
+      router.push("/dashboard");
+
+    }
   }
 
   async function handleSocialSignIn(provider: "google" | "github") {
@@ -65,9 +80,9 @@ export function SignInForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
+        <CardTitle className="text-lg md:text-xl">Iniciar sesión</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Enter your email below to login to your account
+          Ingresa tu correo electrónico para iniciar sesión en tu cuenta
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -97,12 +112,12 @@ export function SignInForm() {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center">
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Contraseña</FormLabel>
                     <Link
                       href="/forgot-password"
                       className="ml-auto inline-block text-sm underline"
                     >
-                      Forgot your password?
+                      ¿Olvidaste tu contraseña?
                     </Link>
                   </div>
                   <FormControl>
@@ -128,7 +143,7 @@ export function SignInForm() {
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <FormLabel>Remember me</FormLabel>
+                  <FormLabel>Recuérdame</FormLabel>
                 </FormItem>
               )}
             />
@@ -152,7 +167,7 @@ export function SignInForm() {
                 onClick={() => handleSocialSignIn("google")}
               >
                 <GoogleIcon width="0.98em" height="1em" />
-                Sign in with Google
+                Inicia sesión con Google
               </Button>
 
               <Button
@@ -163,7 +178,7 @@ export function SignInForm() {
                 onClick={() => handleSocialSignIn("github")}
               >
                 <GitHubIcon />
-                Sign in with Github
+                Inicia sesión con Github
               </Button>
             </div>
           </form>
