@@ -34,13 +34,13 @@ export default async function DashboardPage() {
     <main className="mx-auto w-full max-w-6xl px-4 py-12">
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
+          <h1 className="text-2xl font-semibold">Tablero principal</h1>
           <p className="text-muted-foreground">
-            Welcome back! Here&apos;s your account overview.
+            Bienvenido de nuevo! Aquí está el resumen de tu cuenta.
           </p>
         </div>
         {/* TODO: Use actual user data */}
-        <EmailVerificationAlert />
+        {!usuario.emailVerified && <EmailVerificationAlert />}
         <ProfileInformation user={usuario} />
       </div>
     </main>
@@ -111,11 +111,11 @@ function EmailVerificationAlert() {
         <div className="flex items-center gap-3">
           <MailIcon className="size-5 text-yellow-600 dark:text-yellow-400" />
           <span className="text-yellow-800 dark:text-yellow-200">
-            Please verify your email address to access all features.
+            Por favor verifica tu correo electrónico para acceder a todas las funciones.
           </span>
         </div>
         <Button size="sm" asChild>
-          <Link href="/verify-email">Verify Email</Link>
+          <Link href="/verify-email">Verifica tu correo</Link>
         </Button>
       </div>
     </div>

@@ -12,10 +12,10 @@ export function DeleteApplication() {
     startTransition(async () => {
       try {
         await deleteApplication();
-        toast.success("Application deletion authorized successfully");
+        toast.success("Aplicación borrada con éxito");
       } catch (error) {
         console.error(error);
-        toast.error("Something went wrong");
+        toast.error("Algo salió mal al borrar la aplicación");
       }
     });
   }
@@ -25,10 +25,10 @@ export function DeleteApplication() {
       <div className="border-destructive/20 bg-destructive/5 rounded-lg border p-4">
         <div className="space-y-3">
           <div>
-            <h2 className="text-destructive font-medium">Delete Application</h2>
+            <h2 className="text-destructive font-medium">Borrar aplicación</h2>
             <p className="text-muted-foreground text-sm">
-              This action will delete the entire application. This cannot be
-              undone.
+              Esta acción eliminará toda la aplicación. Esto no se puede
+              deshacer.
             </p>
           </div>
           <LoadingButton
@@ -37,7 +37,7 @@ export function DeleteApplication() {
             variant="destructive"
             className="w-full"
           >
-            Delete Application
+            Borrar aplicación
           </LoadingButton>
         </div>
       </div>
