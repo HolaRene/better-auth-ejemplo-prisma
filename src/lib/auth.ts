@@ -20,6 +20,10 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import prisma from './prisma'
+import { envioEmail } from './email';
+
+import { APIError, createAuthMiddleware } from 'better-auth/api'
+import { passwordSchema } from './validation';
 
 /**
  * Instancia de Better Auth configurada con el adaptador de Prisma.
@@ -29,8 +33,29 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: 'postgresql',
     }),
+
+    // integración con proveedores sociales (OAuth)
+    socialProviders:{
+        // para crear las credenciales, ver:
+        // Google: https://console.developers.google.com/
+        // GitHub: https://github.com/settings/developers
+        google:{
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        },
+        github:{
+            clientId: process.env.GITHUB_CLIENT_ID!,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+        }
+    },
     emailAndPassword: {
         enabled: true,
+        // reseteo de contraseña
+        sendResetPassword({user, url}){
+            console.log(`Enviar email de reseteo de contraseña a ${user.email} con la URL: ${url}`);
+            // Aquí integrar con un servicio de email real para enviar la URL
+            return envioEmail({to: user.email, subject: 'Resetear contraseña', texto: `Para resetear tu contraseña ve a ${url}`});
+        }
     },
     /**
      * Configuración del modelo de usuario en Better Auth.
@@ -56,6 +81,37 @@ export const auth = betterAuth({
             },
         },
     },
+    emailVerification:{
+        sendOnSignUp:true,
+        autoSignInAfterVerification:true,
+        async sendVerificationEmail({user,url, token}){
+            console.log(`Enviar email de verificación a ${user.email} con el token: ${token}`);
+            // Aquí integrar con un servicio de email real para enviar el token
+            await envioEmail({to: user.email, subject: 'Verificación de email', texto: `Para verificar tu email ve a ${url}`});
+        }
+    }, 
+    hooks:{
+        // Middleware "before": se ejecuta antes de las rutas de auth.
+        // Útil para validaciones y reglas de negocio previas.
+        before:createAuthMiddleware(async ctx=>{
+            // Filtro de rutas: aplica la validación solo a flujos de
+            // registro por email, reseteo y cambio de contraseña.
+            if(ctx.path === '/sign-up/email' || ctx.path === '/reset-password' || ctx.path === '/change-password'){
+                // Obtiene la contraseña ingresada: nueva o actual según el flujo.
+                const pasword = ctx.body.password || ctx.body.newPassword;
+
+                // Valida la fortaleza/formato de la contraseña con `passwordSchema`.
+                // `safeParse` retorna un objeto con `error` si no cumple reglas.
+                const { error} = passwordSchema.safeParse(pasword);
+                if(error){
+                    // Detiene la petición con error 400 y un mensaje claro.
+                    throw new APIError("BAD_REQUEST", {
+                        message: "La contraseña no cumple los requisitos de seguridad.",
+                    });
+                }
+            }
+        })
+    }
 })
 
 /**

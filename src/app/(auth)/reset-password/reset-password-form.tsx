@@ -11,6 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { authClient } from "@/lib/auth-client";
 import { passwordSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -41,6 +42,21 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   async function onSubmit({ newPassword }: ResetPasswordValues) {
     // TODO: Handle password reset request
+    setError(null);
+    setSuccess(null);
+    const { error } = await authClient.resetPassword({
+      newPassword,
+      token,
+    })
+    if (error) {
+      setError(error.message || "Ha ocurrido un error al restablecer la contraseña.");
+    } else {
+      setSuccess("Tu contraseña ha sido restablecida con éxito.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      form.reset();
+    }
   }
 
   const loading = form.formState.isSubmitting;
@@ -55,11 +71,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               name="newPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>New password</FormLabel>
+                  <FormLabel>Nueva contraseña</FormLabel>
                   <FormControl>
                     <PasswordInput
                       autoComplete="new-password"
-                      placeholder="Enter new password"
+                      placeholder="Nueva contraseña"
                       {...field}
                     />
                   </FormControl>
@@ -80,7 +96,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             )}
 
             <LoadingButton type="submit" className="w-full" loading={loading}>
-              Reset password
+              Restablecer contraseña
             </LoadingButton>
           </form>
         </Form>

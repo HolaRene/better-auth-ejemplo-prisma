@@ -64,3 +64,5 @@ Aplicación dev en http://localhost:3000.
 - Guía Better Auth + Next.js: https://www.prisma.io/docs/guides/betterauth-nextjs
 - Next.js Docs: https://nextjs.org/docs
 - Prisma Docs: https://www.prisma.io/docs
+
+## Envío de Emails se utiliza resend
