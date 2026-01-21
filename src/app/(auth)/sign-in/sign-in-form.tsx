@@ -45,7 +45,10 @@ export function SignInForm() {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
+
   const searchParams = useSearchParams();
+
+  const redirect = searchParams.get("redirect") || "/dashboard";
 
   const form = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
@@ -68,7 +71,7 @@ export function SignInForm() {
       setError(error.message || "Ha ocurrido un error inesperado");
     } else {
       toast.success("Inicio de sesión exitoso");
-      router.push("/dashboard");
+      router.push(redirect);
 
     }
   }
@@ -78,7 +81,7 @@ export function SignInForm() {
     setError(null);
     setLoading(true);
 
-    const { error } = await authClient.signIn.social({ provider, callbackURL: '/dashboard' })
+    const { error } = await authClient.signIn.social({ provider, callbackURL: redirect })
 
     setLoading(false);
 
