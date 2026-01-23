@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -39,6 +40,17 @@ export function EmailForm({ currentEmail }: EmailFormProps) {
 
   async function onSubmit(values: UpdateEmailValues) {
     // TODO: Handle email update
+    setError(null);
+    setStatus(null);
+    const { error } = await authClient.changeEmail({
+      newEmail: values.newEmail,
+      callbackURL: '/email-verified'
+    })
+    if (error) {
+      setError(error.message || "Error al solicitar el cambio de correo electrónico.");
+    } else {
+      setStatus("Se ha enviado un correo de verificación a tu nueva dirección.");
+    }
   }
 
   const loading = form.formState.isSubmitting;

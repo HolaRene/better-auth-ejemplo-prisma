@@ -11,6 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { authClient } from "@/lib/auth-client";
 import { passwordSchema } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -43,6 +44,19 @@ export function PasswordForm() {
     newPassword,
   }: UpdatePasswordValues) {
     // TODO: Handle password update
+    setError(null);
+    setStatus(null);
+    const { error } = await authClient.changePassword({
+      currentPassword,
+      newPassword,
+      revokeOtherSessions: true,
+    });
+    if (error) {
+      setError(error.message || "Error al cambiar la contraseña.");
+    } else {
+      setStatus("Contraseña cambiada correctamente.");
+      form.reset();
+    }
   }
 
   const loading = form.formState.isSubmitting;

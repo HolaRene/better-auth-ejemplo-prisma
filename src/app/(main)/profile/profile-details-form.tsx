@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UserAvatar } from "@/components/user-avatar";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { User } from "better-auth";
 import { XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -27,28 +29,37 @@ const updateProfileSchema = z.object({
 
 export type UpdateProfileValues = z.infer<typeof updateProfileSchema>;
 
-export function ProfileDetailsForm() {
+interface PerfilFormProps {
+  usuario: User
+}
+
+export function ProfileDetailsForm({ usuario }: PerfilFormProps) {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
 
-  // TODO: Render real user info
-  const user = {
-    name: "John Doe",
-    image: undefined,
-  };
+  // TODO: Render realusuario info
 
   const form = useForm<UpdateProfileValues>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
-      name: user.name ?? "",
-      image: user.image ?? null,
+      name: usuario.name ?? "",
+      image: usuario.image ?? null,
     },
   });
 
   async function onSubmit({ name, image }: UpdateProfileValues) {
     // TODO: Handle profile update
+    setError(null);
+    setStatus(null);
+    const { error } = await authClient.updateUser({ name, image });
+    if (error) {
+      setError(error.message || "Error updating profile.");
+    } else {
+      setStatus("Perfil actualizado correctamente.");
+      router.refresh();
+    }
   }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -110,7 +121,7 @@ export function ProfileDetailsForm() {
             {imagePreview && (
               <div className="relative size-16">
                 <UserAvatar
-                  name={user.name}
+                  name={usuario.name}
                   image={imagePreview}
                   className="size-16"
                 />
@@ -137,7 +148,7 @@ export function ProfileDetailsForm() {
               </div>
             )}
             <LoadingButton type="submit" loading={loading}>
-              Save changes
+              Guardar Cambio
             </LoadingButton>
           </form>
         </Form>

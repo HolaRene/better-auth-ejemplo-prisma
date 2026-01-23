@@ -53,7 +53,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     } else {
       setSuccess("Tu contraseña ha sido restablecida con éxito.");
       setTimeout(() => {
-        router.push("/login");
+        router.push("/sign-in");
       }, 2000);
       form.reset();
     }

@@ -80,6 +80,14 @@ export const auth = betterAuth({
                 input: false,
             },
         },
+        changeEmail:{
+            enabled:true,
+            async sendChangeEmailVerification({user, newEmail, url}){
+                console.log(`Enviar email de verificación de cambio de email a ${newEmail} con la URL: ${url}`);
+                // Aquí integrar con un servicio de email real para enviar la URL
+                await envioEmail({to: user.email, subject: 'Verificación de cambio de correo', texto: `Para verificar el cambio de correo ve a ${url} y el nuevo email es ${newEmail}`});
+            }
+        }
     },
     emailVerification:{
         sendOnSignUp:true,

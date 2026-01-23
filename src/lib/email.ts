@@ -10,7 +10,7 @@ interface SendEmailsValues{
 
 export async function envioEmail({to, subject,texto}: SendEmailsValues): Promise<void> {
     await resend.emails.send({
-        from: 'verificacion@donjoe-example.com',
+        from: 'no-reply@tiendadigitalni.com',
         to,
         subject,
         text:texto,
